@@ -1,0 +1,318 @@
+---
+title: "Trabajo de Text Mining | Proyecto <p> Text Mining aplicado a una novela de Charles Dickens"
+subtitle: "Máster Universitario en Modelización y Análisis de Datos Económicos <p> (MUMADE)"
+author: 'Autores: Bermann, M.A. & Pérez, R.S. [Grupo D]'
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+    prettydoc::html_pretty:
+    theme: cayman
+    highlight: vignette
+lang: es
+---
+
+```{r setup, include = FALSE}
+# Ajustes de los chunk
+knitr::opts_chunk$set(echo = FALSE, 
+                      eval = TRUE, 
+                      message = FALSE,
+                      warning = FALSE,
+                      comment = '')
+```
+
+```{r inicio, include = FALSE}
+# Limpieza inicial del entorno
+rm(list = ls())
+# Instalación de paquetes que no estén instalados
+packages <- c("tidyr",
+              "dplyr",
+              "tidytext",
+              "tidyverse",
+              "gutenbergr",
+              "tokenizers",
+              "tm",
+              "ggplot2",
+              "igraph",
+              "ggraph",
+              "scales",
+              "textdata",
+              "stringr",
+              "knitr",
+              "wordcloud",
+              "reshape2")
+installed_packages <- packages %in% 
+  rownames(installed.packages())
+if (any(installed_packages == FALSE)) {
+  install.packages(packages[!installed_packages])
+}
+# Activación de paquetes
+library(tidyr)
+library(dplyr)
+library(tidytext)
+library(tidyverse)
+library(gutenbergr)
+library(tokenizers)
+library(tm)
+library(ggplot2)
+library(igraph)
+library(ggraph)
+library(scales)
+library(textdata)
+library(knitr)
+library(wordcloud)
+library(reshape2)
+```
+
+# Resumen 
+
+El uso de técnicas analíticas avanzadas para aplicarlo a distintos ámbitos está empezando a ser una constante continua. Una de las técnicas que está proliferando en los últimos años es el análisis de discursos, mensajes, publicaciones en redes sociales, etc. Para ello, se utilizan las llamadas técnicas de minería de texto (text mining). Este creciente interés es el que se intentará abordar en este trabajo. Así, en este caso, se va a leer y analizar una famosa novela, pero la única diferencia es que, esta vez, lo hará el programa R por "nosotros2. De esta forma, se ha escogido la novela **Oliver Twist**, una obra del exponente de la novela social, Charles Dickens, el cual recoge en dicha obra un libro popular con una trama y un conjunto de ambientes que, como veremos, se caracterizan por la decadencia, las cuestiones trágicas, el pesimismo, etc. Además, se verán cambios de entorno según el capítulo analizado, con lo que se podrá ver, momento a momento, los cambios de guión gracias a a las técnicas de _text mining_ mencionadas.
+
+# Procesamiento del texto
+
+En primer lugar se ha **descargado e importado**, al entorno de trabajo, la novela, a través del [Project Gutenberg](https://www.gutenberg.org/ebooks/730), donde _Oliver Twist_ tiene la numeración [730](https://www.gutenberg.org/files/730/730-0.txt).
+
+```{r importacion, include = FALSE}
+# Importando la obra del Proyecto Gutenberg
+olivertwist <- 
+  gutenberg_download(c(730))
+```
+
+En segundo lugar, se ha ajustado el marco de análisis de la novela a partir del inicio del Capítulo I.
+
+```{r ajuste1, include = FALSE}
+# Ajustándonos al principio y final de la novela y otros ajustes
+text_olivertwist <-
+  olivertwist %>% 
+  slice((114:18813)) %>% 
+  select(2) %>% 
+  pull() %>%
+  map(trimws) %>%
+  ifelse(. == "",
+         "_salto_",
+         .) %>%
+  paste0(., collapse = " ") %>%
+  strsplit(split = "_salto_") %>%
+  map(trimws) %>%
+  data.frame(stringsAsFactors = FALSE) %>%
+  as_tibble() %>%
+  {
+    names(.) <- "texto"
+    .
+  }
+```
+
+En tercer lugar, se han eliminado las filas en blanco, así como los cambios de renglones vacíos.
+
+```{r ajuste2, include = FALSE}
+# Eliminando filas en blanco finales
+text_olivertwist <-
+  text_olivertwist %>% 
+  slice((1:3894))
+
+# Quitando renglones vacíos
+text_olivertwist <-
+  text_olivertwist %>%
+  filter(!texto %in% c("",
+                       "")) %>%
+  mutate_all(trimws)
+```
+
+En cuarto lugar, se han agrupado los párrafos por capítulos y se ha tokenizado.
+
+```{r ajuste3, include = FALSE}
+# Agrupando párrafos por capítulos
+text_olivertwist %>%
+  filter(grepl("CHAPTER",
+               texto))
+text_olivertwist <-
+  text_olivertwist %>%
+  mutate(capitulo = ifelse(grepl("CHAPTER", 
+                                 texto), 
+                           texto, NA)) %>%
+  fill(capitulo) %>%
+  filter(texto != capitulo)
+
+# Tokenizando
+tidy_olivertwist <- 
+  text_olivertwist %>%
+  unnest_tokens(word, texto) %>%
+  anti_join(stop_words)
+```
+
+# Análisis de sentimientos
+
+En esta sección, analizamos _token_ por _token_ (en este caso, palabra por palabra) si corresponde a un sentimiento positivo o negativo de la colección de palabras de Bing. Hemos decidido usar ese repositorio de palabras ya que el resto que nos ofrece R categorizan las palabras en varios grupos, por lo que no son tan sencillos de representar y identificar. Hemos encontrado muy interesante la fuente "afinn", pero al tener un tercio de las palabras del repositorio de Bing hemos decidido descartarlo. 
+
+```{r}
+bing <- 
+  get_sentiments("bing")
+sentimiento <-
+  left_join(x = tidy_olivertwist,
+            y = bing,
+            by = "word") %>% 
+  count(word, 
+        sentiment, 
+        sort = TRUE)
+
+sentimiento <- 
+  drop_na(sentimiento)
+
+sentimiento_filtrado <- 
+  sentimiento %>% 
+  filter(n > 25)
+
+sentimiento_positivo <-
+  sentimiento_filtrado %>% 
+  filter(sentiment == "positive")
+sentimiento_negativo <-
+  sentimiento_filtrado %>%
+  filter(sentiment == "negative")
+
+ggplot(sentimiento_positivo,
+       aes(word,
+           n))+
+  geom_point()+
+  theme_light()+
+  theme(axis.text.x = element_text(angle = 90))+
+  ggtitle("Palabras positivas más comunes")+
+  ylab("Frecuencia")+
+  xlab("Palabra")
+
+ggplot(sentimiento_negativo,
+       aes(word, n)) +
+  geom_point()+
+  theme_light()+
+  theme(axis.text.x = element_text(angle = 90))+
+  ggtitle("Palabras negativas más comunes")+
+  ylab("Frecuencia")+
+  xlab("Palabra")
+
+sentimiento_positivo %>% 
+  head(10) %>% 
+  kable()
+
+sentimiento_negativo %>% 
+  head(10) %>% 
+  kable()
+
+sum(sentimiento_positivo$n)
+sum(sentimiento_negativo$n)
+```
+
+Nos llama la atención que la palabra que más aparece, *master*, aunque sea clasificada como positiva, en el contexto de la obra puede verse más como un signo de sumisión, y por lo tanto, negativa. También vemos que hay palabras como happy o love que son eminentemente positivas. 
+Respecgto a las palabras negativas, si bien descartamos Twist por ser el apellido del protagonista, tienen una frecuencia acumulada mayor, y son palabras unívocas. Oscuro, pobre, frío o muerto solo pueden ser interpretadas de un modo. Destacamos muerte y muerto ya que es la más negativa de las palabras, y que aparecen 53 veces cada una.
+
+En total, hay más de dos veces palabras negativas que positivas, aun contando *master* como palabra postiva.
+
+Vamos a comparar por capítulo.
+
+```{r}
+sentimiento_capitulo <-
+  left_join(x = tidy_olivertwist,
+            y = bing,
+            by = "word") %>% 
+  drop_na()
+
+sentimiento_capitulo <-
+  sentimiento_capitulo %>% 
+  group_by(capitulo)
+```
+
+Vamos a comparar cuánto se repiten las palabras negativas y positivas al principio y final de la obra para ver cómo se desarrolla.
+
+```{r}
+capitulo_positivo <-
+  sentimiento_capitulo %>%
+  filter(sentiment == "positive")
+
+capitulo_negativo <-
+  sentimiento_capitulo %>%
+  filter(sentiment == "negative")
+
+capitulo_positivo %>%
+  group_by(capitulo) %>%
+  count(sentiment)
+
+capitulo_negativo %>%
+  group_by(capitulo) %>%
+  count(sentiment)
+```
+
+# Nube de palabras
+
+```{r}
+tidy_olivertwist %>%
+ count(word) %>%
+ with(wordcloud(word,
+                n,
+                max.words = 150))
+
+tidy_olivertwist %>%
+ inner_join(bing) %>%
+ count(word,
+       sentiment,
+       sort = TRUE) %>%
+ acast(word ~ sentiment,
+       value.var = "n",
+       fill = 0) %>%
+ comparison.cloud(colors = c("red3",
+                             "green3"),
+ max.words = 150)
+```
+
+# Frecuencia de palabras
+
+```{r}
+# Palabras más frecuentes
+tidy_olivertwist %>%
+  count(word,
+        sort = TRUE)
+
+# Gráfico de frecuencia de palabras
+frequency <-
+  tidy_olivertwist %>%
+  count(word,
+        sort = TRUE,) %>% 
+  mutate(proportion = n / sum(n))
+
+frequency <- frequency %>% 
+  slice(1:75)
+
+ggplot(frequency,
+       aes(word,
+           proportion))+
+  geom_point(color = "red4")+
+  theme_light()+
+  theme(axis.text.x = element_text(angle = 90),
+        axis.text = element_text(size = 7))+
+  ggtitle("Palabras más utilizadas")+
+  ylab("Frecuencia") +
+  xlab("Palabra")
+```
+
+# Conclusiones
+
+Párrafo 1
+
+Párrafo 2
+
+# Referencias
+
+En esta sección se incluyen las referencias bibliográficas utilizadas para el desarrollo del proyecto.
+
+[Dickens, C. (1837). Oliver Twist. Project Gutenberg. https://www.gutenberg.org/ebooks/730.](https://www.gutenberg.org/ebooks/730)
+
+Gutiérrez, M.J. (2022). Text mining con R. Aprendizaje estadístico y otras técnicas avanzadas. Máster Universitario en Modelización y Análisis de Datos Económicos. Universidad de Castilla-La Mancha.
+
+[El Cronovisor (2017). Charles Dickens, genio de la crítica social. Episodio 4. https://open.spotify.com/episode/3lLBJHZGY3verRFV6ptEbS?si=9_xGOeGWTiW4ijZuIexBeg&utm_source=copy-link](https://open.spotify.com/episode/3lLBJHZGY3verRFV6ptEbS?si=9_xGOeGWTiW4ijZuIexBeg&utm_source=copy-link)
+
+[Silge, J. & Robinson D. (2022). Text Mining with R. https://www.tidytextmining.com/tidytext.html.](https://www.tidytextmining.com/tidytext.html)
+
+# Anexos
+
+## Anexo 1. Datos de la sesión
+
+En esta sección se recogen los datos de la sesión utilizada para elaborar este informe. Es fundamental observar la versión de R, así como las versiones de los paquetes bajo los cuales se ha ejecutado el código o *script*.
+
+```{r}
+sessionInfo()
+```
