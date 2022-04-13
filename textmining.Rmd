@@ -39,6 +39,7 @@ packages <- c("tidyr",
               "knitr",
               "wordcloud",
               "reshape2")
+
 installed_packages <- packages %in% 
   rownames(installed.packages())
 if (any(installed_packages == FALSE)) {
@@ -116,13 +117,14 @@ text_olivertwist <-
   mutate_all(trimws)
 ```
 
-En cuarto lugar, se han agrupado los párrafos por capítulos y se ha tokenizado.
+En cuarto lugar, se han agrupado los párrafos por capítulos y se ha _tokenizado_.
 
 ```{r ajuste3, include = FALSE}
 # Agrupando párrafos por capítulos
 text_olivertwist %>%
   filter(grepl("CHAPTER",
                texto))
+
 text_olivertwist <-
   text_olivertwist %>%
   mutate(capitulo = ifelse(grepl("CHAPTER", 
@@ -140,11 +142,18 @@ tidy_olivertwist <-
 
 # Análisis de sentimientos
 
-En esta sección, analizamos _token_ por _token_ (en este caso, palabra por palabra) si corresponde a un sentimiento positivo o negativo de la colección de palabras de Bing. Hemos decidido usar ese repositorio de palabras ya que el resto que nos ofrece R categorizan las palabras en varios grupos, por lo que no son tan sencillos de representar y identificar. Hemos encontrado muy interesante la fuente "afinn", pero al tener un tercio de las palabras del repositorio de Bing hemos decidido descartarlo. 
+En este primer capítulo, se va a realizar un análisis _token_ por _token_ (en este caso, palabra por palabra) de la novela, determinando si estos corresponden a **sentimientos positivos o negativos**, a partir de la colección de palabras de _Bing_.
 
-```{r}
+Se ha decidido utilizar el repositorio de palabras _Bing_ ya que el resto ofrecido por R categorizan las palabras en varios grupos, por lo que no son tan sencillos de representar e identificar. En este sentido, cabe decir que se ha encontrado muy interesante la fuente _"afinn"_, pero al tener un tercio de las palabras del repositorio de _Bing_ se ha decidido descartar.
+
+Para realizar todo lo comentado se han importado las palabras del repositorio _Bing_ y se han cruzado los datos con las palabras que contiene la novela de Dickens, identificando así qué palabras se consideran "positivas" y cuáles "negativas" en dicha novela.
+
+```{r sentimientos1, include = FALSE}
+# Importando las palabras de bing
 bing <- 
   get_sentiments("bing")
+
+# Creando el objeto sentimiento que analiza las palabras de la novela que coinciden con las del repositorio bing
 sentimiento <-
   left_join(x = tidy_olivertwist,
             y = bing,
@@ -153,39 +162,65 @@ sentimiento <-
         sentiment, 
         sort = TRUE)
 
+# Eliminando del objeto sentimiento las palabras de la novela que no están en bing (missing values)
 sentimiento <- 
   drop_na(sentimiento)
 
+# Objeto que recoge las palabras que se repiten mas de 25 veces
 sentimiento_filtrado <- 
   sentimiento %>% 
   filter(n > 25)
 
+# Creando el objeto de palabras positivas
 sentimiento_positivo <-
   sentimiento_filtrado %>% 
   filter(sentiment == "positive")
+
+# Creando el objeto de palabras negativas
 sentimiento_negativo <-
   sentimiento_filtrado %>%
   filter(sentiment == "negative")
+```
 
+## Análisis de sentimientos sobre la obra en conjunto
+
+Así, en primer lugar, se puede obtener un gráfico de las **palabras "positivas"** más frecuentas en la novela de Dickens. Llama la atención que la palabra más frecuente es *master*, la cual, aunque se clasifique como positiva, en el contexto de la obra puede verse más como un signo de sumisión, y por lo tanto, negativa. También se observan palabras como _happy_ o _love_, que son eminentemente positivas. 
+
+```{r sentimientos2, fig.align = 'center', fig.height = 5, fig.width = 10}
+# Graficando la frecuencia de palabras positivas
 ggplot(sentimiento_positivo,
        aes(word,
            n))+
-  geom_point()+
-  theme_light()+
+  geom_point(color = 'green3',
+             size = 4,
+             shape = 10)+
+  theme_bw(base_size = 11)+
   theme(axis.text.x = element_text(angle = 90))+
   ggtitle("Palabras positivas más comunes")+
   ylab("Frecuencia")+
   xlab("Palabra")
+```
 
+En cuanto a las **palabras "negativas"**, si bien se descarta _Twist_, por ser el apellido de Oliver, el protagonista, estas palabras tienen una frecuencia acumulada mucho mayor que las palabras positivas, siendo palabras unívocas y que van en la línea de la trama de la novela. _Oscuro_, _pobre_, _frío_ o _muerto_ solo pueden ser interpretadas de un modo, y es ese ambiente de decadencia que describe continuamente la novela donde las injusticias, el maltrato y la pobreza son una constante en la vida del pequeño Oliver. Destaca especialmente también las palabras _muerte_ y _muerto_, dos palabras muy negativas que se reptien, ambas, 53 veces.
+
+```{r sentimientos3, fig.align = 'center', fig.height = 5, fig.width = 10}
+# Graficando la frecuencia de palabras negativas
 ggplot(sentimiento_negativo,
-       aes(word, n)) +
-  geom_point()+
-  theme_light()+
+       aes(word,
+           n))+
+  geom_point(color = 'red3',
+             size = 4,
+             shape = 10)+
+  theme_bw(base_size = 11)+
   theme(axis.text.x = element_text(angle = 90))+
   ggtitle("Palabras negativas más comunes")+
   ylab("Frecuencia")+
   xlab("Palabra")
+```
 
+Si se refleja en una tabla la información anterior, se podrá ver cómo la frecuencia de palabras negativas repetidas es mucho mayor que la frecuencia de palabras positivas. En total, hay más de dos veces palabras negativas (`r sum(sentimiento_negativo$n)`) que positivas (`r sum(sentimiento_positivo$n)`), aun contando y teniendo en cuenta *master* como palabra postiva.
+
+```{r sentimientos4}
 sentimiento_positivo %>% 
   head(10) %>% 
   kable()
@@ -193,19 +228,13 @@ sentimiento_positivo %>%
 sentimiento_negativo %>% 
   head(10) %>% 
   kable()
-
-sum(sentimiento_positivo$n)
-sum(sentimiento_negativo$n)
 ```
 
-Nos llama la atención que la palabra que más aparece, *master*, aunque sea clasificada como positiva, en el contexto de la obra puede verse más como un signo de sumisión, y por lo tanto, negativa. También vemos que hay palabras como happy o love que son eminentemente positivas. 
-Respecgto a las palabras negativas, si bien descartamos Twist por ser el apellido del protagonista, tienen una frecuencia acumulada mayor, y son palabras unívocas. Oscuro, pobre, frío o muerto solo pueden ser interpretadas de un modo. Destacamos muerte y muerto ya que es la más negativa de las palabras, y que aparecen 53 veces cada una.
+## Análisis de sentimientos por capítulos
 
-En total, hay más de dos veces palabras negativas que positivas, aun contando *master* como palabra postiva.
+Una vez realizado el análisis de los sentimientos de la obra en su conjunto, teniendo en cuenta la evolución de los escenarios y de lo que transcurre a lo largo de dicha obra, puede ser de interés ver **cómo se diferencias los distintos sentimientos a lo largo de los capítulos**. Para ello, se han agrupado las palabras positivas y negativas por capítulos.
 
-Vamos a comparar por capítulo.
-
-```{r}
+```{r sentimientos5}
 sentimiento_capitulo <-
   left_join(x = tidy_olivertwist,
             y = bing,
@@ -215,11 +244,7 @@ sentimiento_capitulo <-
 sentimiento_capitulo <-
   sentimiento_capitulo %>% 
   group_by(capitulo)
-```
 
-Vamos a comparar cuánto se repiten las palabras negativas y positivas al principio y final de la obra para ver cómo se desarrolla.
-
-```{r}
 capitulo_positivo <-
   sentimiento_capitulo %>%
   filter(sentiment == "positive")
@@ -227,11 +252,19 @@ capitulo_positivo <-
 capitulo_negativo <-
   sentimiento_capitulo %>%
   filter(sentiment == "negative")
+```
 
+Así, en primer lugar, si se analizan las **palabras positivas**, se observa cómo hay dos secciones claves en las que hay más palabras positivas. Primero, en los capítulos XII y XIV hay una mayor frecuencia de palabras positivas. Veamos únicamente cómo se llama, por ejemplo, el capítulo XII. La segunda sección de palabras positivas frecuentes se da justo antes de finalizar en los capítulos XXXII, XXXIII, XXXIV y XXXVI. Sólo hace falta fijarse en el capítulo XXXII, donde Oliver Twist emprende diferentes amistades y aumenta su felicidad y bienestar respecto a anteriores situaciones.
+
+```{r sentimientos6}
 capitulo_positivo %>%
   group_by(capitulo) %>%
   count(sentiment)
+```
 
+En segundo lugar, si se analizan las **palabras negativas**, en primer lugar se observan que sus frecuencias son mucho mayores. Parece paradójico que la mayor concentración de estos sentimientos negativos se dan al final de la obra, donde casi se alcanzan en uno de los capítulos las 200 palabras negativas.
+
+```{r sentimientos7}
 capitulo_negativo %>%
   group_by(capitulo) %>%
   count(sentiment)
@@ -239,13 +272,21 @@ capitulo_negativo %>%
 
 # Nube de palabras
 
-```{r}
+Párrafo introductorio
+
+Explicación 1
+
+```{r nube1}
 tidy_olivertwist %>%
  count(word) %>%
  with(wordcloud(word,
                 n,
                 max.words = 150))
+```
 
+Explicación 2
+
+```{r nube2}
 tidy_olivertwist %>%
  inner_join(bing) %>%
  count(word,
@@ -261,12 +302,20 @@ tidy_olivertwist %>%
 
 # Frecuencia de palabras
 
-```{r}
+Párrafo introductorio
+
+Explicación 1
+
+```{r frec1}
 # Palabras más frecuentes
 tidy_olivertwist %>%
   count(word,
         sort = TRUE)
+```
 
+Explicación 2
+
+```{r frec2}
 # Gráfico de frecuencia de palabras
 frequency <-
   tidy_olivertwist %>%
