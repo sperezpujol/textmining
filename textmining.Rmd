@@ -67,9 +67,11 @@ library(reshape2)
 
 El uso de técnicas analíticas avanzadas para su aplicación a distintos ámbitos está empezando a ser una continua constante. Una de las técnicas que está proliferando en los últimos años es el análisis de discursos, mensajes, publicaciones en redes sociales, etc. Para ello, se utilizan las llamadas técnicas de minería de texto (text mining). Este creciente interés es el que se intentará abordar en este trabajo. Así, en este caso, se va a leer y analizar una famosa novela, pero la única diferencia es que, esta vez, lo hará el programa R por "nosotros". De esta forma, se ha escogido la novela **Oliver Twist**, una obra del exponente de la novela social, Charles Dickens, el cual recoge en dicha obra un libro popular con una trama y un conjunto de ambientes que, como se verá, se caracterizan por la decadencia, las cuestiones trágicas, el pesimismo, etc. Además, se verán cambios de entorno según el capítulo analizado, con lo que se podrá ver, momento a momento, los cambios de guión gracias a a las técnicas de _text mining_ mencionadas.
 
-# Procesamiento del texto
+# I. Procesamiento del texto
 
 En este primer lugar se detalla cómo se ha obtenido y procesado el texto. En primer lugar se ha **descargado e importado**, al entorno de trabajo, la novela, a través del [Project Gutenberg](https://www.gutenberg.org/ebooks/730), donde _Oliver Twist_ tiene la numeración [730](https://www.gutenberg.org/files/730/730-0.txt).
+
+Pueden verse las primeras líneas de la obra extraída a continuación:
 
 ```{r importacion}
 # Importando la obra del Proyecto Gutenberg
@@ -81,7 +83,7 @@ olivertwist %>%
 
 En segundo lugar, se ha ajustado el marco de análisis de la novela a partir del inicio del Capítulo I.
 
-```{r ajuste1, include = FALSE}
+```{r ajuste1}
 # Ajustándonos al principio y final de la novela y otros ajustes
 text_olivertwist <-
   olivertwist %>% 
@@ -108,7 +110,7 @@ text_olivertwist %>%
 
 En tercer lugar, se han eliminado las filas en blanco, así como los cambios de renglones vacíos.
 
-```{r ajuste2, include = FALSE}
+```{r ajuste2}
 # Eliminando filas en blanco finales
 text_olivertwist <-
   text_olivertwist %>% 
@@ -128,7 +130,7 @@ text_olivertwist %>%
 
 En cuarto lugar, se han agrupado los párrafos por capítulos y se ha _tokenizado_.
 
-```{r ajuste3, include = FALSE}
+```{r ajuste3}
 # Agrupando párrafos por capítulos
 text_olivertwist %>%
   filter(grepl("CHAPTER",
@@ -155,7 +157,7 @@ tidy_olivertwist %>%
   head()
 ```
 
-# Análisis de sentimientos
+# II. Análisis de sentimientos
 
 En este segundo capítulo, se va a realizar un análisis _token_ por _token_ (en este caso, palabra por palabra) de la novela, determinando si estos corresponden a **sentimientos positivos o negativos**, a partir de la colección de palabras de _Bing_.
 
@@ -163,7 +165,7 @@ Se ha decidido utilizar el repositorio de palabras _Bing_ ya que el resto ofreci
 
 Para realizar todo lo comentado se han importado las palabras del repositorio _Bing_ y se han cruzado los datos con las palabras que contiene la novela de Dickens, identificando así qué palabras se consideran "positivas" y cuáles "negativas" en dicha novela.
 
-```{r sentimientos1, include = FALSE}
+```{r sentimientos1}
 # Importando las palabras de bing
 bing <- 
   get_sentiments("bing")
@@ -198,7 +200,7 @@ sentimiento_negativo <-
   filter(sentiment == "negative")
 ```
 
-## Análisis de sentimientos sobre la obra en conjunto
+## II.I. Análisis de sentimientos sobre la obra en conjunto
 
 Así, en primer lugar, se puede obtener un gráfico de las **palabras "positivas"** más frecuentas en la novela de Dickens. Llama la atención que la palabra más frecuente es *master*, la cual, aunque se clasifique como positiva, en el contexto de la obra puede verse más como un signo de sumisión, y por lo tanto, negativa. También se observan palabras como _happy_ o _love_, que son eminentemente positivas. 
 
@@ -246,9 +248,9 @@ sentimiento_negativo %>%
   kable()
 ```
 
-## Análisis de sentimientos por capítulos
+## II.II. Análisis de sentimientos por capítulos
 
-Una vez realizado el análisis de los sentimientos de la obra en su conjunto, teniendo en cuenta la evolución de los escenarios y de lo que transcurre a lo largo de dicha obra, puede ser de interés ver **cómo se diferencias los distintos sentimientos a lo largo de los capítulos**. Para ello, se han agrupado las palabras positivas y negativas por capítulos.
+Una vez realizado el análisis de los sentimientos de la obra en su conjunto, teniendo en cuenta la evolución de los escenarios y de lo que transcurre a lo largo de dicha obra, puede ser de interés ver **cómo se diferencian los distintos sentimientos a lo largo de los capítulos**. Para ello, se han agrupado las palabras positivas y negativas por capítulos.
 
 ```{r sentimientos5}
 sentimiento_capitulo <-
@@ -286,7 +288,7 @@ capitulo_negativo %>%
   count(sentiment)
 ```
 
-# Nube de palabras
+# III. Nube de palabras
 
 En este tercer apartado, se realizará una **nube de palabras** para representar las palabras más comunes a lo largo del libro. Así, no sólo se verán las palabras más frecuentes, sino que, a través del tamaño, se verá su importancia de un solo vistazo. Esto se realizará a cabo dos veces: en primer lugar para todo el vocabulario de la novela, y en segundo lugar con las palabras que constituyen sentimientos positivos y negativos.
 
@@ -316,7 +318,7 @@ tidy_olivertwist %>%
  max.words = 150)
 ```
 
-# Frecuencia de palabras
+# IV. Frecuencia de palabras
 
 En este cuarto capítulo se va a explorar qué palabras aparecen más veces en el libro, a través de una tabla y de un gráfico. Ya que es la misma información obtenida en la primera nube de palabras graficada en el anterior capítulo, se verán muchas palabras repetidas. Sin embargo, al estar en un formato menos gráfico, pero más completo y preciso, en el que se verán cuántas veces se repite exactamente cada palabra, se podrá ver con más detalle las características del texto.
 
@@ -331,7 +333,7 @@ tidy_olivertwist %>%
         sort = TRUE)
 ```
 
-Si todo lo expuesto se representa gráficamente, esto sirve para ver mejor las frecuencias de cada palabra, ya que en el resto de representaciones se ha visto la frecuencia en valores absolutos. Desde luego, al ser una obra extensa, no hay palabras tan comunes. Si fuese, por ejemplo, un cuento, se verían frecuencias relativas más altas.
+Si todo lo expuesto se representa gráficamente, esto sirve para ver mejor las frecuencias de cada palabra, ya que en el resto de representaciones se ha visto la frecuencia en valores absolutos. Desde luego, al ser una obra extensa, no hay palabras tan comunes. Si fuese por ejemplo, un cuento, se verían frecuencias relativas más altas.
 
 ```{r frec2}
 # Gráfico de frecuencia de palabras
@@ -356,7 +358,7 @@ ggplot(frequency,
   xlab("Palabra")
 ```
 
-# Conclusiones
+# V. Conclusiones
 
 Párrafo 1
 
