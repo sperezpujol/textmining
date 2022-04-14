@@ -1,5 +1,5 @@
 ---
-title: "Trabajo de Text Mining <p> Text Mining aplicado a una novela de Charles Dickens"
+title: "Trabajo de Text Mining | Proyecto <p> Text Mining aplicado a una novela de Charles Dickens"
 subtitle: "Máster Universitario en Modelización y Análisis de Datos Económicos <p> (MUMADE)"
 author: 'Autores: Bermann, M.A. & Pérez, R.S. [Grupo D]'
 date: "`r format(Sys.time(), '%d %B, %Y')`"
@@ -65,16 +65,18 @@ library(reshape2)
 
 # Resumen 
 
-El uso de técnicas analíticas avanzadas para aplicarlo a distintos ámbitos está empezando a ser una constante continua. Una de las técnicas que está proliferando en los últimos años es el análisis de discursos, mensajes, publicaciones en redes sociales, etc. Para ello, se utilizan las llamadas técnicas de minería de texto (text mining). Este creciente interés es el que se intentará abordar en este trabajo. Así, en este caso, se va a leer y analizar una famosa novela, pero la única diferencia es que, esta vez, lo hará el programa R por "nosotros2. De esta forma, se ha escogido la novela **Oliver Twist**, una obra del exponente de la novela social, Charles Dickens, el cual recoge en dicha obra un libro popular con una trama y un conjunto de ambientes que, como veremos, se caracterizan por la decadencia, las cuestiones trágicas, el pesimismo, etc. Además, se verán cambios de entorno según el capítulo analizado, con lo que se podrá ver, momento a momento, los cambios de guión gracias a a las técnicas de _text mining_ mencionadas.
+El uso de técnicas analíticas avanzadas para su aplicación a distintos ámbitos está empezando a ser una continua constante. Una de las técnicas que está proliferando en los últimos años es el análisis de discursos, mensajes, publicaciones en redes sociales, etc. Para ello, se utilizan las llamadas técnicas de minería de texto (text mining). Este creciente interés es el que se intentará abordar en este trabajo. Así, en este caso, se va a leer y analizar una famosa novela, pero la única diferencia es que, esta vez, lo hará el programa R por "nosotros". De esta forma, se ha escogido la novela **Oliver Twist**, una obra del exponente de la novela social, Charles Dickens, el cual recoge en dicha obra un libro popular con una trama y un conjunto de ambientes que, como se verá, se caracterizan por la decadencia, las cuestiones trágicas, el pesimismo, etc. Además, se verán cambios de entorno según el capítulo analizado, con lo que se podrá ver, momento a momento, los cambios de guión gracias a a las técnicas de _text mining_ mencionadas.
 
 # Procesamiento del texto
 
-En primer lugar se ha **descargado e importado**, al entorno de trabajo, la novela, a través del [Project Gutenberg](https://www.gutenberg.org/ebooks/730), donde _Oliver Twist_ tiene la numeración [730](https://www.gutenberg.org/files/730/730-0.txt).
+En este primer lugar se detalla cómo se ha obtenido y procesado el texto. En primer lugar se ha **descargado e importado**, al entorno de trabajo, la novela, a través del [Project Gutenberg](https://www.gutenberg.org/ebooks/730), donde _Oliver Twist_ tiene la numeración [730](https://www.gutenberg.org/files/730/730-0.txt).
 
-```{r importacion, include = FALSE}
+```{r importacion}
 # Importando la obra del Proyecto Gutenberg
 olivertwist <- 
   gutenberg_download(c(730))
+olivertwist %>% 
+  head()
 ```
 
 En segundo lugar, se ha ajustado el marco de análisis de la novela a partir del inicio del Capítulo I.
@@ -99,6 +101,9 @@ text_olivertwist <-
     names(.) <- "texto"
     .
   }
+
+text_olivertwist %>% 
+  head()
 ```
 
 En tercer lugar, se han eliminado las filas en blanco, así como los cambios de renglones vacíos.
@@ -108,6 +113,8 @@ En tercer lugar, se han eliminado las filas en blanco, así como los cambios de 
 text_olivertwist <-
   text_olivertwist %>% 
   slice((1:3894))
+text_olivertwist %>% 
+  head()
 
 # Quitando renglones vacíos
 text_olivertwist <-
@@ -115,6 +122,8 @@ text_olivertwist <-
   filter(!texto %in% c("",
                        "")) %>%
   mutate_all(trimws)
+text_olivertwist %>% 
+  head()
 ```
 
 En cuarto lugar, se han agrupado los párrafos por capítulos y se ha _tokenizado_.
@@ -124,6 +133,8 @@ En cuarto lugar, se han agrupado los párrafos por capítulos y se ha _tokenizad
 text_olivertwist %>%
   filter(grepl("CHAPTER",
                texto))
+text_olivertwist %>% 
+  head()
 
 text_olivertwist <-
   text_olivertwist %>%
@@ -132,17 +143,21 @@ text_olivertwist <-
                            texto, NA)) %>%
   fill(capitulo) %>%
   filter(texto != capitulo)
+text_olivertwist %>% 
+  head()
 
 # Tokenizando
 tidy_olivertwist <- 
   text_olivertwist %>%
   unnest_tokens(word, texto) %>%
   anti_join(stop_words)
+tidy_olivertwist %>% 
+  head()
 ```
 
 # Análisis de sentimientos
 
-En este primer capítulo, se va a realizar un análisis _token_ por _token_ (en este caso, palabra por palabra) de la novela, determinando si estos corresponden a **sentimientos positivos o negativos**, a partir de la colección de palabras de _Bing_.
+En este segundo capítulo, se va a realizar un análisis _token_ por _token_ (en este caso, palabra por palabra) de la novela, determinando si estos corresponden a **sentimientos positivos o negativos**, a partir de la colección de palabras de _Bing_.
 
 Se ha decidido utilizar el repositorio de palabras _Bing_ ya que el resto ofrecido por R categorizan las palabras en varios grupos, por lo que no son tan sencillos de representar e identificar. En este sentido, cabe decir que se ha encontrado muy interesante la fuente _"afinn"_, pero al tener un tercio de las palabras del repositorio de _Bing_ se ha decidido descartar.
 
@@ -152,7 +167,8 @@ Para realizar todo lo comentado se han importado las palabras del repositorio _B
 # Importando las palabras de bing
 bing <- 
   get_sentiments("bing")
-
+bing %>% 
+  head()
 # Creando el objeto sentimiento que analiza las palabras de la novela que coinciden con las del repositorio bing
 sentimiento <-
   left_join(x = tidy_olivertwist,
@@ -201,7 +217,7 @@ ggplot(sentimiento_positivo,
   xlab("Palabra")
 ```
 
-En cuanto a las **palabras "negativas"**, si bien se descarta _Twist_, por ser el apellido de Oliver, el protagonista, estas palabras tienen una frecuencia acumulada mucho mayor que las palabras positivas, siendo palabras unívocas y que van en la línea de la trama de la novela. _Oscuro_, _pobre_, _frío_ o _muerto_ solo pueden ser interpretadas de un modo, y es ese ambiente de decadencia que describe continuamente la novela donde las injusticias, el maltrato y la pobreza son una constante en la vida del pequeño Oliver. Destaca especialmente también las palabras _muerte_ y _muerto_, dos palabras muy negativas que se reptien, ambas, 53 veces.
+En cuanto a las **palabras "negativas"**, si bien se descarta _Twist_, por ser el apellido de Oliver, el protagonista, estas palabras tienen una frecuencia acumulada mucho mayor que las palabras positivas, siendo palabras unívocas y que van en la línea de la trama de la novela. _Oscuro_, _pobre_, _frío_ o _muerto_ solo pueden ser interpretadas de un modo, y es en ese ambiente de decadencia que describe continuamente la novela donde las injusticias, el maltrato y la pobreza son una constante en la vida del pequeño Oliver. Destaca especialmente también las palabras _muerte_ y _muerto_, dos palabras muy negativas que se reptien, ambas, 53 veces.
 
 ```{r sentimientos3, fig.align = 'center', fig.height = 5, fig.width = 10}
 # Graficando la frecuencia de palabras negativas
@@ -272,9 +288,9 @@ capitulo_negativo %>%
 
 # Nube de palabras
 
-Párrafo introductorio
+En este tercer apartado, se realizará una **nube de palabras** para representar las palabras más comunes a lo largo del libro. Así, no sólo se verán las palabras más frecuentes, sino que, a través del tamaño, se verá su importancia de un solo vistazo. Esto se realizará a cabo dos veces: en primer lugar para todo el vocabulario de la novela, y en segundo lugar con las palabras que constituyen sentimientos positivos y negativos.
 
-Explicación 1
+Así, respecto al primer planteamiento, si se realiza una nube de palabras para el conjunto del vocabulario de la novela, se verá cómo en dicha nube destacan personajes (Oliver Twist, Bumble, Fagin, un judío -y no judíos en plural, con lo que es posible que un personaje sea caracterizado así en vez de una comunidad-, un doctor, Noah, etc.), elementos que dan una visión de la ambientación (*boy*, *girl*, *gentleman*, *sir*, *child*, *fire*, *hat*) que es de la vida infantil de la Inglaterra de los años 1830. Por último, hay palabras que bien podrían estar en cualquier libro (*door*, _head_, *eyes*, *time*, *hand*, *day*, *night*).
 
 ```{r nube1}
 tidy_olivertwist %>%
@@ -284,7 +300,7 @@ tidy_olivertwist %>%
                 max.words = 150))
 ```
 
-Explicación 2
+En segundo lugar, se acota la nube de palabras a las palabras categorizadas en el análisis de sentimientos como positivas y negativas, de manera que se sabrá que tendrán un significado relevante para el análisis aquí realizado. De esta forma, se observa que, de igual manera que se vio gracias a la tabla en el anterior apartado, *master* tiene una frecuencia muy alta. Dentro del resto de palabras positivas, se ven algunas que tienen un deje de tristeza, como _heaven_, _quiet_, _silent_ o incluso _fine_ (se debe recordar que también significa multa). Las palabras negativas que más aparecen son _poor_, _cold_, _dark_ y _dead_. Aparece _twist_, pero al ser el apellido del protagonista, no se debe tomar en cuenta como palabra negativa.
 
 ```{r nube2}
 tidy_olivertwist %>%
@@ -302,9 +318,11 @@ tidy_olivertwist %>%
 
 # Frecuencia de palabras
 
-Párrafo introductorio
+En este cuarto capítulo se va a explorar qué palabras aparecen más veces en el libro, a través de una tabla y de un gráfico. Ya que es la misma información obtenida en la primera nube de palabras graficada en el anterior capítulo, se verán muchas palabras repetidas. Sin embargo, al estar en un formato menos gráfico, pero más completo y preciso, en el que se verán cuántas veces se repite exactamente cada palabra, se podrá ver con más detalle las características del texto.
 
-Explicación 1
+De esta forma, se observa que la palabra más frecuente es el nombre de pila del protagonista, que se menciona casi 700 veces. Llaman la atención palabras de estilo que se repiten mucho,  como _replied_, _time_ o incluso _dear_. También son muy frecuentes nombres de personajes, como Fagin, Sikes o  Bumble. Hay que tener en cuento que se ha escapado alguna palabra vacía como _don't_ o _it's_ que, al ser contracciones, no aparecen en la base de _stop words_ utilizada.
+
+También se puede navegar en las palabras que eran demasiado raras para aparecer en la nube de texto, pero son suficienteme frecuentes como para tener un impacto en el texto, como los verbos usados(*spoke*, _stood_, _brittles_, _stopped_, _appeared_, _fell_, _cried_) en el texto, que también dan una idea de lo que pasa en el libro, con acciones físicas como caídas y paradas y acciones más literarias como hablar, aparecer o llorar.
 
 ```{r frec1}
 # Palabras más frecuentes
@@ -313,7 +331,7 @@ tidy_olivertwist %>%
         sort = TRUE)
 ```
 
-Explicación 2
+Si todo lo expuesto se representa gráficamente, esto sirve para ver mejor las frecuencias de cada palabra, ya que en el resto de representaciones se ha visto la frecuencia en valores absolutos. Desde luego, al ser una obra extensa, no hay palabras tan comunes. Si fuese, por ejemplo, un cuento, se verían frecuencias relativas más altas.
 
 ```{r frec2}
 # Gráfico de frecuencia de palabras
@@ -350,9 +368,9 @@ En esta sección se incluyen las referencias bibliográficas utilizadas para el 
 
 [Dickens, C. (1837). Oliver Twist. Project Gutenberg. https://www.gutenberg.org/ebooks/730.](https://www.gutenberg.org/ebooks/730)
 
-Gutiérrez, M.J. (2022). Text mining con R. Aprendizaje estadístico y otras técnicas avanzadas. Máster Universitario en Modelización y Análisis de Datos Económicos. Universidad de Castilla-La Mancha.
-
 [El Cronovisor (2017). Charles Dickens, genio de la crítica social. Episodio 4. https://open.spotify.com/episode/3lLBJHZGY3verRFV6ptEbS?si=9_xGOeGWTiW4ijZuIexBeg&utm_source=copy-link](https://open.spotify.com/episode/3lLBJHZGY3verRFV6ptEbS?si=9_xGOeGWTiW4ijZuIexBeg&utm_source=copy-link)
+
+Gutiérrez, M.J. (2022). Text mining con R. Aprendizaje estadístico y otras técnicas avanzadas. Máster Universitario en Modelización y Análisis de Datos Económicos. Universidad de Castilla-La Mancha.
 
 [Silge, J. & Robinson D. (2022). Text Mining with R. https://www.tidytextmining.com/tidytext.html.](https://www.tidytextmining.com/tidytext.html)
 
