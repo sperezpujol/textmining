@@ -1,5 +1,5 @@
 ---
-title: "Trabajo de Text Mining | Proyecto <p> Text Mining aplicado a una novela de Charles Dickens"
+title: "Trabajo de Text Mining <p> Text Mining aplicado a una novela de Charles Dickens"
 subtitle: "Máster Universitario en Modelización y Análisis de Datos Económicos <p> (MUMADE)"
 author: 'Autores: Bermann, M.A. & Pérez, R.S. [Grupo D]'
 date: "`r format(Sys.time(), '%d %B, %Y')`"
