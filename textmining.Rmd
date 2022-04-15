@@ -360,9 +360,13 @@ ggplot(frequency,
 
 # V. Conclusiones
 
-Párrafo 1
+Las técnicas de análisis de datos están en continuo desarrollo en plena sociedad de la información. En este sentido, las técnicas de minería de texto (*text mining*) aparecen como una herramienta que permite analizar de forma más cualitativa ámbitos que, con técnicas exclusivamente orientadas a datos numéricos no son capaces de considerar.
 
-Párrafo 2
+De esta forma, en este trabajo, se ha escogido la obra _Oliver Twist_, una novela de _Charles Dickens_ enmarcada en plena Revolución Industrial en una Inglaterra donde, dicha obra, escenifica una ambientación de decadencia y de pesimismo por las consecuencias de dicha época. En este sentido, dicha obra se ha importado del _Project Gutenberg_, y con las técnicas de minería de texto se ha procesado el texto y se ha podido ver que, Oliver Twist, es una obra que a lo largo de su duración predominan los sentimientos tristes, y se ambienta en la época en la que se escribió y los nombres de sus personajes. 
+
+También se ha podido ver que relata una historia que ocurre en la parte baja de la sociedad, con un personaje que representa las minorías religiosas y que, en su desenlace, hay un aumento de palabras positivas y sobre la amistad. Gracias a ello, se deduce que tiene un carácter social con un final feliz, una historia que sirvió para acercar una realidad a aquellas personas que tenían la suerte de estar alejada de ella. Esto entra en la coherencia de la línea literaria de Dickens, un autor entregado a las causas sociales en cada una de sus obras, y que incluso traspasaría su propia dimensión filantrópica.
+
+Sin embargo, el análisis realizado en este trabajo también supone perder partes fundamentales del texto: cuáles son los hechos por los que pasa el protagonista (que efectivamente está presente a lo largo de la novela), las enseñanzas que nos aporta el final feliz, cómo actúa cada personaje y, sobre todo, la lectura placentera de uno de los grandes clásicos victorianos de Dickens.
 
 # Referencias
 
