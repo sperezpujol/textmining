@@ -1,8 +1,6 @@
 # :information_source: **TRABAJO FINAL: TEXT MINING CON R**
 
-_Última modificación: 13 de abril de 2022_
-
-**¡ATENCIÓN! ESTE ENTORNO DE TRABAJO NO ESTÁ FINALIZADO. LOS DOCUMENTOS QUE PUEDA ENCONTRAR EN ÉL SON BORRADORES DE TRABAJO**
+_Última modificación: 17 de abril de 2022_
 
 Este repositorio contiene los documentos y archivos necesarios para la entrega del trabajo de la asignatura **TEXT MINING** de **Aprendizaje Estadístico y Otras Técnicas Analíticas Avanzadas (AEOTAA)** del **Máster Universitario en Modelización y Análisis de Datos Económicos (MUMADE)** realizado por los alumnos:
 
@@ -18,8 +16,6 @@ Este repositorio contiene los documentos y archivos necesarios para la entrega d
 
 En este trabajo usaremos técnicas de text mining para analizar la obra **Oliver Twist**, del exponente de la novela social **Charles Dickens**. Esta novela, inspirada en la época victoriana, recoge el conjunto de sentimientos de decadencia, pobreza y diferentes cuestiones vividas en el auge de la Revolución Industrial y sus efectos en la Inglaterra de la época. Las diferentes técnicas nos permitirán analizar la obra, plantear nubes de palabras, ver en qué medida la obra es más positiva o negativa, etc. Para ello importamos la obra (nº 730) del Gutenberg Project.
 
-La estructura del repositorio es la siguiente. El archivo [textmining.Rmd](https://github.com/sperezpujol/textmining/edit/main/textmining.Rmd) contiene el documento reproducible. Por su parte, el archivo [textmining-html](https://github.com/sperezpujol/textmining/edit/main/textmining.html) contiene la salida output en formato _.html_ tras la ejecución del archivo R Markdown.
-
-**¡ATENCIÓN! ESTE ENTORNO DE TRABAJO NO ESTÁ FINALIZADO. LOS DOCUMENTOS QUE PUEDA ENCONTRAR EN ÉL SON BORRADORES DE TRABAJO**
+La estructura del repositorio es la siguiente. El archivo [textmining.Rmd](https://github.com/sperezpujol/textmining/edit/main/textmining.Rmd) contiene el documento reproducible. Por su parte, el archivo [textmining.html](https://github.com/sperezpujol/textmining/edit/main/textmining.html) contiene la salida output en formato _.html_ tras la ejecución del archivo R Markdown. También se puede encontrar el archivo [textmining.pdf](https://github.com/sperezpujol/textmining/edit/main/textmining.pdf), el cual contiene la salida output en formato _.pdf_ tras la ejecución del archivo R Markdown.
 
 _UCLM | MUMADE | AEOTAA | Curso 2021/22_
