@@ -65,11 +65,15 @@ library(reshape2)
 
 # Resumen 
 
-El uso de técnicas analíticas avanzadas para su aplicación a distintos ámbitos está empezando a ser una continua constante. Una de las técnicas que está proliferando en los últimos años es el análisis de discursos, mensajes, publicaciones en redes sociales, etc. Para ello, se utilizan las llamadas técnicas de minería de texto (text mining). Este creciente interés es el que se intentará abordar en este trabajo. Así, en este caso, se va a leer y analizar una famosa novela, pero la única diferencia es que, esta vez, lo hará el programa R por "nosotros". De esta forma, se ha escogido la novela **Oliver Twist**, una obra del exponente de la novela social, Charles Dickens, el cual recoge en dicha obra un libro popular con una trama y un conjunto de ambientes que, como se verá, se caracterizan por la decadencia, las cuestiones trágicas, el pesimismo, etc. Además, se verán cambios de entorno según el capítulo analizado, con lo que se podrá ver, momento a momento, los cambios de guión gracias a a las técnicas de _text mining_ mencionadas.
+El uso de técnicas analíticas avanzadas para su aplicación a distintos ámbitos está empezando a ser una continua constante. Una de las técnicas que está proliferando en los últimos años es el análisis de discursos, mensajes, publicaciones en redes sociales, etc. Para ello, se utilizan las llamadas técnicas de minería de texto (text mining). Este creciente interés es el que se intentará abordar en este trabajo. Así, en este caso, se va a leer y analizar una famosa novela, pero la única diferencia es que, esta vez, lo hará el programa R por "nosotros". De esta forma, se ha escogido la novela **Oliver Twist**, una obra del exponente de la novela social, Charles Dickens, el cual recoge en dicha obra un libro con una trama y un conjunto de ambientes que, como se verá, se caracterizan por la decadencia, las cuestiones trágicas, el pesimismo, etc. Además, se verán cambios de entorno según el capítulo analizado, con lo que se podrá ver, momento a momento, la evolución del guión gracias a a las técnicas de _text mining_ mencionadas.
+
+\newpage
 
 # I. Procesamiento del texto
 
-En este primer lugar se detalla cómo se ha obtenido y procesado el texto. En primer lugar se ha **descargado e importado**, al entorno de trabajo, la novela, a través del [Project Gutenberg](https://www.gutenberg.org/ebooks/730), donde _Oliver Twist_ tiene la numeración [730](https://www.gutenberg.org/files/730/730-0.txt).
+En este primer capítulo se detalla cómo se ha obtenido y procesado el texto.
+
+En primer lugar se ha **descargado e importado**, al entorno de trabajo, la novela, a través del [Project Gutenberg](https://www.gutenberg.org/ebooks/730), donde _Oliver Twist_ tiene la numeración [730](https://www.gutenberg.org/files/730/730-0.txt).
 
 Pueden verse las primeras líneas de la obra extraída a continuación:
 
@@ -128,7 +132,7 @@ text_olivertwist %>%
   head()
 ```
 
-En cuarto lugar, se han agrupado los párrafos por capítulos y se ha _tokenizado_.
+En cuarto lugar, se han agrupado los párrafos por capítulos y se ha _tokenizado_ por palabras, es decir, se ha tomado cada palabra como unidad de significado.
 
 ```{r ajuste3}
 # Agrupando párrafos por capítulos
@@ -156,6 +160,8 @@ tidy_olivertwist <-
 tidy_olivertwist %>% 
   head()
 ```
+
+\newpage
 
 # II. Análisis de sentimientos
 
@@ -272,7 +278,7 @@ capitulo_negativo <-
   filter(sentiment == "negative")
 ```
 
-Así, en primer lugar, si se analizan las **palabras positivas**, se observa cómo hay dos secciones claves en las que hay más palabras positivas. Primero, en los capítulos XII y XIV hay una mayor frecuencia de palabras positivas. Veamos únicamente cómo se llama, por ejemplo, el capítulo XII. La segunda sección de palabras positivas frecuentes se da justo antes de finalizar en los capítulos XXXII, XXXIII, XXXIV y XXXVI. Sólo hace falta fijarse en el capítulo XXXII, donde Oliver Twist emprende diferentes amistades y aumenta su felicidad y bienestar respecto a anteriores situaciones.
+Así, en primer lugar, si se analizan las **palabras positivas**, se observa cómo hay dos secciones claves en las que hay más palabras positivas. Primero, en los capítulos XII y XIV hay una mayor frecuencia de palabras positivas. Véase únicamente cómo se llama, por ejemplo, el capítulo XII. La segunda sección de palabras positivas frecuentes se da justo antes de finalizar en los capítulos XXXII, XXXIII, XXXIV y XXXVI. Sólo hace falta fijarse en el capítulo XXXII, donde Oliver Twist emprende diferentes amistades y aumenta su felicidad y bienestar respecto a anteriores situaciones.
 
 ```{r sentimientos6}
 capitulo_positivo %>%
@@ -287,6 +293,8 @@ capitulo_negativo %>%
   group_by(capitulo) %>%
   count(sentiment)
 ```
+
+\newpage
 
 # III. Nube de palabras
 
@@ -318,13 +326,15 @@ tidy_olivertwist %>%
  max.words = 150)
 ```
 
+\newpage
+
 # IV. Frecuencia de palabras
 
 En este cuarto capítulo se va a explorar qué palabras aparecen más veces en el libro, a través de una tabla y de un gráfico. Ya que es la misma información obtenida en la primera nube de palabras graficada en el anterior capítulo, se verán muchas palabras repetidas. Sin embargo, al estar en un formato menos gráfico, pero más completo y preciso, en el que se verán cuántas veces se repite exactamente cada palabra, se podrá ver con más detalle las características del texto.
 
 De esta forma, se observa que la palabra más frecuente es el nombre de pila del protagonista, que se menciona casi 700 veces. Llaman la atención palabras de estilo que se repiten mucho,  como _replied_, _time_ o incluso _dear_. También son muy frecuentes nombres de personajes, como Fagin, Sikes o  Bumble. Hay que tener en cuento que se ha escapado alguna palabra vacía como _don't_ o _it's_ que, al ser contracciones, no aparecen en la base de _stop words_ utilizada.
 
-También se puede navegar en las palabras que eran demasiado raras para aparecer en la nube de texto, pero son suficienteme frecuentes como para tener un impacto en el texto, como los verbos usados(*spoke*, _stood_, _brittles_, _stopped_, _appeared_, _fell_, _cried_) en el texto, que también dan una idea de lo que pasa en el libro, con acciones físicas como caídas y paradas y acciones más literarias como hablar, aparecer o llorar.
+También se puede navegar en las palabras que eran demasiado raras para aparecer en la nube de texto, pero son suficienteme frecuentes como para tener un impacto en el texto, como los verbos usados (*spoke*, _stood_, _brittles_, _stopped_, _appeared_, _fell_, _cried_) en el texto, que también dan una idea de lo que pasa en el libro, con acciones físicas como caídas y paradas, y acciones más literarias como hablar, aparecer o llorar.
 
 ```{r frec1}
 # Palabras más frecuentes
@@ -333,7 +343,7 @@ tidy_olivertwist %>%
         sort = TRUE)
 ```
 
-Si todo lo expuesto se representa gráficamente, esto sirve para ver mejor las frecuencias de cada palabra, ya que en el resto de representaciones se ha visto la frecuencia en valores absolutos. Desde luego, al ser una obra extensa, no hay palabras tan comunes. Si fuese por ejemplo, un cuento, se verían frecuencias relativas más altas.
+Si todo lo expuesto se representa gráficamente, esto sirve para ver mejor las frecuencias de cada palabra, ya que en el resto de representaciones se ha visto la frecuencia en valores absolutos. Desde luego, al ser una obra extensa, no hay palabras tan comunes. Si fuese, por ejemplo, un cuento, se verían frecuencias relativas más altas.
 
 ```{r frec2}
 # Gráfico de frecuencia de palabras
@@ -358,6 +368,8 @@ ggplot(frequency,
   xlab("Palabra")
 ```
 
+\newpage
+
 # V. Conclusiones
 
 Las técnicas de análisis de datos están en continuo desarrollo en plena sociedad de la información. En este sentido, las técnicas de minería de texto (*text mining*) aparecen como una herramienta que permite analizar de forma más cualitativa ámbitos que, con técnicas exclusivamente orientadas a datos numéricos no son capaces de considerar.
@@ -367,6 +379,8 @@ De esta forma, en este trabajo, se ha escogido la obra _Oliver Twist_, una novel
 También se ha podido ver que relata una historia que ocurre en la parte baja de la sociedad, con un personaje que representa las minorías religiosas y que, en su desenlace, hay un aumento de palabras positivas y sobre la amistad. Gracias a ello, se deduce que tiene un carácter social con un final feliz, una historia que sirvió para acercar una realidad a aquellas personas que tenían la suerte de estar alejada de ella. Esto entra en la coherencia de la línea literaria de Dickens, un autor entregado a las causas sociales en cada una de sus obras, y que incluso traspasaría su propia dimensión filantrópica.
 
 Sin embargo, el análisis realizado en este trabajo también supone perder partes fundamentales del texto: cuáles son los hechos por los que pasa el protagonista (que efectivamente está presente a lo largo de la novela), las enseñanzas que nos aporta el final feliz, cómo actúa cada personaje y, sobre todo, la lectura placentera de uno de los grandes clásicos victorianos de Dickens.
+
+\newpage
 
 # Referencias
 
@@ -379,6 +393,8 @@ En esta sección se incluyen las referencias bibliográficas utilizadas para el 
 Gutiérrez, M.J. (2022). Text mining con R. Aprendizaje estadístico y otras técnicas avanzadas. Máster Universitario en Modelización y Análisis de Datos Económicos. Universidad de Castilla-La Mancha.
 
 [Silge, J. & Robinson D. (2022). Text Mining with R. https://www.tidytextmining.com/tidytext.html.](https://www.tidytextmining.com/tidytext.html)
+
+\newpage
 
 # Anexos
 
